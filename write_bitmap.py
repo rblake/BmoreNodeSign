@@ -5,7 +5,7 @@ import struct
 def open_arduino():
     locations=['/dev/ttyUSB0','/dev/ttyUSB1','/dev/ttyUSB2','/dev/ttyUSB3',  
                '/dev/ttyS0','/dev/ttyS1','/dev/ttyS2','/dev/ttyS3',
-               'COM1', 'COM2', 'COM3', 'COM4', 'COM5']
+               'COM1', 'COM2', 'COM3', 'COM4', 'COM5', 'COM6', 'COM7', 'COM8']
     
     for device in locations:    
         try:    
