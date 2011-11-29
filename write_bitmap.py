@@ -4,7 +4,9 @@ import struct
 
 def open_arduino():
     locations=['/dev/ttyUSB0','/dev/ttyUSB1','/dev/ttyUSB2','/dev/ttyUSB3',  
-               '/dev/ttyS0','/dev/ttyS1','/dev/ttyS2','/dev/ttyS3']    
+               '/dev/ttyS0','/dev/ttyS1','/dev/ttyS2','/dev/ttyS3',
+               'COM1', 'COM2', 'COM3', 'COM4', 'COM5']
+    
     for device in locations:    
         try:    
             print "Trying...",device  
