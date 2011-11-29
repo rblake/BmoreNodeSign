@@ -1,6 +1,7 @@
 
 
 from ui_color import Ui_Color
+from write_bitmap import open_arduino
 
 import serial
 import struct
@@ -8,21 +9,6 @@ import struct
 # QT
 from PyQt4.QtCore import *
 from PyQt4.QtGui import *
-
-
-def open_arduino():
-    locations=['/dev/ttyUSB0','/dev/ttyUSB1','/dev/ttyUSB2','/dev/ttyUSB3',  
-               '/dev/ttyS0','/dev/ttyS1','/dev/ttyS2','/dev/ttyS3']    
-    for device in locations:    
-        try:    
-            print "Trying...",device  
-            arduino = serial.Serial(device, 9600)   
-            break  
-        except:    
-            print "Failed to connect on",device     
-
-    return arduino
-
 
 class Color(QMainWindow,Ui_Color):
     def __init__(self):

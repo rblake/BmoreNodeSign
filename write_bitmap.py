@@ -1,7 +1,19 @@
 
 import Image
-from color import open_arduino
 import struct
+
+def open_arduino():
+    locations=['/dev/ttyUSB0','/dev/ttyUSB1','/dev/ttyUSB2','/dev/ttyUSB3',  
+               '/dev/ttyS0','/dev/ttyS1','/dev/ttyS2','/dev/ttyS3']    
+    for device in locations:    
+        try:    
+            print "Trying...",device  
+            arduino = serial.Serial(device, 9600)   
+            break  
+        except:    
+            print "Failed to connect on",device     
+
+    return arduino
 
 def convert_image_for_arduino(filename):
     im = Image.open(filename)
