@@ -8,7 +8,7 @@ def open_arduino():
                'COM1', 'COM2', 'COM3', 'COM4', 'COM5', 'COM6', 'COM7', 'COM8']
     try:
         import serial.tools.list_ports as list_ports
-        locations += list_ports.comports()
+        locations += [port[0] for port in list_ports.comports()]
     except:
         pass
 
