@@ -6,16 +6,21 @@ def open_arduino():
     locations=['/dev/ttyUSB0','/dev/ttyUSB1','/dev/ttyUSB2','/dev/ttyUSB3',  
                '/dev/ttyS0','/dev/ttyS1','/dev/ttyS2','/dev/ttyS3',
                'COM1', 'COM2', 'COM3', 'COM4', 'COM5', 'COM6', 'COM7', 'COM8']
-    
+    try:
+        import serial.tools.list_ports as list_ports
+        locations += list_ports.comports()
+    except:
+        pass
+
     for device in locations:    
         try:    
             print "Trying...",device  
-            arduino = serial.Serial(device, 9600)   
-            break  
+            arduino = serial.Serial(device, 9600)
+            return arduino
         except:    
             print "Failed to connect on",device     
-
-    return arduino
+    print "Could not find arduino!"
+    return None
 
 def convert_image_for_arduino(filename):
     im = Image.open(filename)
