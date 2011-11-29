@@ -1,5 +1,5 @@
-
 import Image
+import serial
 import struct
 
 def open_arduino():
