@@ -21,10 +21,14 @@ class PixelDisplay:
         this_frame = np.reshape(np.fromstring(data, dtype=np.uint8, count=self.width*self.height*3), (self.width,self.height,3))
 
         pygame.surfarray.blit_array(self.small_screen, this_frame)
+        self.render_surface()
+
+    def render_surface(self):
         pygame.transform.scale(self.small_screen, self.screen.get_size(), self.screen)
         pygame.display.flip()
 
-
+    def get_surface(self):
+        return self.small_screen
 
 
 if __name__=="__main__":
