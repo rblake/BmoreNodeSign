@@ -6,33 +6,43 @@ import os
 import struct
 import numpy as np
 
-if __name__=="__main__":
-    pixel_size = 8
-    size = width, height = 8*16 , 8
-    speed = [2, 2]
+class PixelDisplay:
+    def __init__(self, width, height, pixel_size=8):
+        self.pixel_size = pixel_size
+        self.width = width
+        self.height = height
+        
+        self.screen = pygame.display.set_mode((self.width*self.pixel_size, self.height*self.pixel_size))
+        
+        self.small_screen = pygame.Surface((self.width,self.height))
+        
 
-    black = 0, 0, 0
-    white = 255, 255, 255
-    screen = pygame.display.set_mode((width*pixel_size, height*pixel_size))
-    small_screen = pygame.Surface((width, height))
+    def render_frame(self, data):
+        this_frame = np.reshape(np.fromstring(data, dtype=np.uint8, count=self.width*self.height*3), (self.width,self.height,3))
+
+        pygame.surfarray.blit_array(self.small_screen, this_frame)
+        pygame.transform.scale(self.small_screen, self.screen.get_size(), self.screen)
+        pygame.display.flip()
+
+
+
+
+if __name__=="__main__":
+
+    p = PixelDisplay(64,8,12)
 
     os.mkfifo("pipe")
     pipe = open("pipe", "rb", 0)
     
-
     data = ""
     while 1:
         #read in the buffer
         data += pipe.read()
-        frame_extent = width*height*3
+        frame_extent = p.width*p.height*3
         if len(data) >= frame_extent:
             print "displaying", len(data)
-            this_frame = np.reshape(np.fromstring(data[0:frame_extent], dtype=np.uint8, count=frame_extent), (width,height,3))
+            p.render_frame(data[0:frame_extent])
             data = data[frame_extent:]
-
-            pygame.surfarray.blit_array(small_screen, this_frame)
-            pygame.transform.scale(small_screen, screen.get_size(), screen)
-            pygame.display.flip()
         
         for event in pygame.event.get():
             if event.type == pygame.QUIT: sys.exit()
