@@ -4,17 +4,7 @@ import pygame
 import time
 
 from fake_server import PixelDisplay
-
-class TextRenderer:
-    def __init__(self):
-        self.font = pygame.image.load("8x8font.png")
-    
-    def render_text_bitmap(self, text):
-        rendered_text = pygame.Surface((len(text)*8,8))
-        for ii in xrange(0,len(text)):
-            rendered_text.blit(self.font, (ii*8,0), area=pygame.Rect(ord(text[ii])*8,0,8,8))
-        return rendered_text
-
+from fake_server import TextRenderer
 
 if __name__=="__main__":
     import sys
