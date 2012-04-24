@@ -49,7 +49,7 @@ void demo();
 void setup() 
 {
 
-  LW.begin(25, 5);
+  LW.begin(50, 10);
 }
 
 void loop()
@@ -94,9 +94,9 @@ void set_single(int i, int j)
 // Demo Routine plays 
 void demo()
 {
-  for (int i=0;i<25; i = (i + 1) % 25)
+  for (int i=0;i<50; i = (i + 1) % 50)
   { 
-    for (int j=0;j<25;j++)
+    for (int j=0;j<50;j++)
     {
       set_single(i, j);      
       LW.send_frame(j);
