@@ -31,17 +31,18 @@
 
 // These are used to adjust the internal timings during output.
 // Depending on the tolerances of individual bulbs you may need to adjust these.
-#define START_BLIP   PORTD = 0xFF; _delay_us(10);
-#define START_NUM    PORTD = 0x00; _delay_us(10); 
-#define START_BRIGHT PORTD = 0x00; _delay_us(10); 
-#define START_COLOR  PORTD = 0x00; _delay_us(10); 
+#define OUT_ONE      do { PORTD &= 0x0F; PORTB &= 0xF0; _delay_us(10); } while(0)
+#define OUT_ZERO     do { PORTD |= 0xF0; PORTB |= 0x0F; _delay_us(10); } while(0)
 
-#define OUT_ONE      PORTD = 0x00; _delay_us(10); 
-#define OUT_ZERO     PORTD = 0xFF; _delay_us(10); 
-#define OUT_VAR(var) PORTD =  var; _delay_us(10); 
+#define START_BLIP   do { PORTD |= 0xF0; PORTB |= 0x0F; _delay_us(10); } while(0)
+#define START_NUM    do { PORTD &= 0x0F; PORTB &= 0xF0; _delay_us(10); } while(0)
+#define START_BRIGHT do { PORTD &= 0x0F; PORTB &= 0xF0; _delay_us(10); } while(0)
+#define START_COLOR  do { PORTD &= 0x0F; PORTB &= 0xF0; _delay_us(10); } while(0)
 
-#define STOP_BIT     PORTD = 0xFF; _delay_us(10); 
-#define STOP_BLIP    PORTD = 0x00;
+#define OUT_VAR(var) do { PORTD ^= ((var) & 0xF0); PORTB ^= ((var) & 0x0F); _delay_us(10); } while(0)
+
+#define STOP_BIT     do { PORTD |= 0xF0; PORTB |= 0x0F; _delay_us(10); } while(0)
+#define STOP_BLIP    do { PORTD &= 0x0F; PORTB &= 0xF0; } while(0)
 
 #define DEFAULT_INTENSITY (0xCC)
 
