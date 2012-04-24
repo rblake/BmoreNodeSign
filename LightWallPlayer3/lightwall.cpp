@@ -54,7 +54,7 @@ void LightWall::begin(uint8_t lightsPerString, uint8_t lightsPerRow)
   
 
   //Enable RX TX Pins for Serial com
-  DDRD = B0000010;
+  DDRD = B00000010;
   //delay to catch serial com
   //DO NOT REMOVE THIS DELAY OR YOU WILL NOT BE ABLE TO REFLASH THE ARDUINO
   pinMode(13, OUTPUT);   

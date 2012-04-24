@@ -39,7 +39,7 @@
 #define START_BRIGHT do { PORTD &= 0x0F; PORTB &= 0xF0; _delay_us(10); } while(0)
 #define START_COLOR  do { PORTD &= 0x0F; PORTB &= 0xF0; _delay_us(10); } while(0)
 
-#define OUT_VAR(var) do { PORTD ^= ((var) & 0xF0); PORTB ^= ((var) & 0x0F); _delay_us(10); } while(0)
+#define OUT_VAR(var) do { PORTD = (PORTD & 0x0F) | ((var) & 0xF0); PORTB = (PORTB & 0xF0) | ((var) & 0x0F); _delay_us(10); } while(0)
 
 #define STOP_BIT     do { PORTD |= 0xF0; PORTB |= 0x0F; _delay_us(10); } while(0)
 #define STOP_BLIP    do { PORTD &= 0x0F; PORTB &= 0xF0; } while(0)
