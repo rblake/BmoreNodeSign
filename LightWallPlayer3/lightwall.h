@@ -31,18 +31,25 @@
 
 // These are used to adjust the internal timings during output.
 // Depending on the tolerances of individual bulbs you may need to adjust these.
-#define OUT_ONE      do { PORTD &= 0x0F; PORTB &= 0xF0; _delay_us(10); } while(0)
-#define OUT_ZERO     do { PORTD |= 0xF0; PORTB |= 0x0F; _delay_us(10); } while(0)
+#define PREPARE_OUTPUT do { DDRD |= B11111110; DDRB |= B00101111; DDRC |= B00111111; } while(0)
+#define SAY_ONE      do { PORTD &= 0x03; PORTB &= 0xF0; PORTC &= 0xC0; } while(0)
+#define SAY_ZERO     do { PORTD |= 0xFC; PORTB |= 0x0F; PORTC &= 0x3F; } while(0)
+#define OUT_ONE      do { SAY_ONE; _delay_us(10); } while(0)
+#define OUT_ZERO     do { SAY_ZERO; _delay_us(10); } while(0)
 
-#define START_BLIP   do { PORTD |= 0xF0; PORTB |= 0x0F; _delay_us(10); } while(0)
-#define START_NUM    do { PORTD &= 0x0F; PORTB &= 0xF0; _delay_us(10); } while(0)
-#define START_BRIGHT do { PORTD &= 0x0F; PORTB &= 0xF0; _delay_us(10); } while(0)
-#define START_COLOR  do { PORTD &= 0x0F; PORTB &= 0xF0; _delay_us(10); } while(0)
+#define START_BLIP   do { SAY_ZERO; _delay_us(10); } while(0)
+#define START_NUM    do { SAY_ONE;  _delay_us(10); } while(0)
+#define START_BRIGHT do { SAY_ONE;  _delay_us(10); } while(0)
+#define START_COLOR  do { SAY_ONE;  _delay_us(10); } while(0)
 
-#define OUT_VAR(var) do { PORTD = (PORTD & 0x0F) | ((var) & 0xF0); PORTB = (PORTB & 0xF0) | ((var) & 0x0F); _delay_us(10); } while(0)
+#define OUT_VAR(hi,lo) do {                                     \
+PORTC = (PORTC & 0xC0) | ((lo) & 0x3F);                         \
+PORTD = (PORTD & 0x03) | (((hi) &0xF0 | ((lo) >> 4)) & 0xFC);   \
+PORTB = (PORTB & 0xF0) | ((hi) & 0x0F); _delay_us(10);          \
+} while(0)
 
-#define STOP_BIT     do { PORTD |= 0xF0; PORTB |= 0x0F; _delay_us(10); } while(0)
-#define STOP_BLIP    do { PORTD &= 0x0F; PORTB &= 0xF0; } while(0)
+#define STOP_BIT     do { SAY_ZERO; _delay_us(10); } while(0)
+#define STOP_BLIP    do { SAY_ONE; } while(0)
 
 #define DEFAULT_INTENSITY (0xCC)
 
@@ -65,7 +72,7 @@ class LightWall {
   *
   * The data bus is inverted, so the data going in must be inverted as well,
   */
-  uint8_t Buffer[12];
+  uint8_t Buffer[24];
   
   // Prior to initializtion and addressing, a 30 second delay is introduced to provide time
   // to reprogram the arduino.

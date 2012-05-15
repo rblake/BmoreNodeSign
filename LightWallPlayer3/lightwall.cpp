@@ -66,8 +66,7 @@ void LightWall::begin(uint8_t lightsPerString, uint8_t lightsPerRow)
     delay(500);
   }
   //Set full output
-  DDRD = B11110000;
-  DDRB = B00101111;
+  PREPARE_OUTPUT;
 
   //Set the initial addressing for the bulbs
   address_lights();
@@ -236,44 +235,44 @@ uint8_t LightWall::lightsPerRow()
 
   //send Blue (4 bits, MSB first)
   START_COLOR;
-  OUT_VAR(Buffer[0]);
+  OUT_VAR(Buffer[0],Buffer[1]);
   STOP_BIT;
   START_COLOR;
-  OUT_VAR(Buffer[1]);
+  OUT_VAR(Buffer[2],Buffer[3]);
   STOP_BIT;
   START_COLOR;
-  OUT_VAR(Buffer[2]);
+  OUT_VAR(Buffer[4],Buffer[5]);
   STOP_BIT;
   START_COLOR;
-  OUT_VAR(Buffer[3]);
+  OUT_VAR(Buffer[6],Buffer[7]);
   STOP_BIT;
  
   //send Green (4 bits, MSB first)
   START_COLOR;
-  OUT_VAR(Buffer[4]);
+  OUT_VAR(Buffer[8],Buffer[9]);
   STOP_BIT;
   START_COLOR;
-  OUT_VAR(Buffer[5]);
+  OUT_VAR(Buffer[10],Buffer[11]);
   STOP_BIT;
   START_COLOR;
-  OUT_VAR(Buffer[6]);
+  OUT_VAR(Buffer[12],Buffer[13]);
   STOP_BIT;
   START_COLOR;
-  OUT_VAR(Buffer[7]);
+  OUT_VAR(Buffer[14],Buffer[15]);
   STOP_BIT;
 
   //send Red (4 bits, MSB first)
   START_COLOR;
-  OUT_VAR(Buffer[8]);
+  OUT_VAR(Buffer[16],Buffer[17]);
   STOP_BIT;
   START_COLOR;
-  OUT_VAR(Buffer[9]);
+  OUT_VAR(Buffer[18],Buffer[19]);
   STOP_BIT;
   START_COLOR;
-  OUT_VAR(Buffer[10]);
+  OUT_VAR(Buffer[20],Buffer[21]);
   STOP_BIT;
   START_COLOR;
-  OUT_VAR(Buffer[11]);
+  OUT_VAR(Buffer[22],Buffer[23]);
   STOP_BIT;
 
   //Set line idle
