@@ -49,7 +49,7 @@ void demo();
 void setup() 
 {
 
-  LW.begin(50, 10);
+  LW.begin(32, 8);
 }
 
 char stuff[50] = {
@@ -117,7 +117,7 @@ void loop()
       K = Serial.read();
     }
     if (!do_read || O == 'O' && K == 'K') {
-      for (int ii=0; ii<50; ii++) {
+      for (int ii=0; ii<32; ii++) {
         for (int jj=0; jj<12; jj++) {
           if (do_read) {
             LW.Buffer[jj]=Serial.read();
