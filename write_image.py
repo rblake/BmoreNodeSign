@@ -33,32 +33,30 @@ def convert_image_for_arduino(filename):
     assert(rows == 8)
     assert(cols == 32)
     assert(im.mode == "RGB")
-    s = "OK"
-    bit_array = np.zeros((8,32,12),np.bool)
-    for strand in xrange(0,8):
+    s = ""
+    pin_bulb_color = np.zeros((8,32,12),np.bool)
+    for pin in xrange(0,8):
         for row in xrange(0,rows):
             for localcol in xrange(0,4):
-                col = strand*4+localcol
-                strandindex = localcol*8+row
+                col = pin*4+localcol
+                bulb = localcol*8+row
                 (r0,g0,b0) = im.getpixel((col,row))
-                if strandindex==1:
-                    print strand,strandindex,r0,g0,b0
                 for bit in xrange(0,4):
-                    bit_array[strand,strandindex,  bit] = not (b0 & (0x01 << (4+bit)))
-                    bit_array[strand,strandindex,4+bit] = not (g0 & (0x01 << (4+bit)))
-                    bit_array[strand,strandindex,8+bit] = not (r0 & (0x01 << (4+bit)))
-    for ii in xrange(0,32):
-        print bit_array[:,ii,:]
-    word_array = np.zeros((32,12),np.uint8)
-    for ii in xrange(0,32):
-        for jj in xrange(0,12):
+                    pin_bulb_color[pin,bulb,  bit] = not (b0 & (0x01 << (4+bit)))
+                    pin_bulb_color[pin,bulb,4+bit] = not (g0 & (0x01 << (4+bit)))
+                    pin_bulb_color[pin,bulb,8+bit] = not (r0 & (0x01 << (4+bit)))
+    for bulb in xrange(0,32):
+        print pin_bulb_color[:,bulb,:]
+    bulb_color = np.zeros((32,12),np.uint8)
+    for bulb in xrange(0,32):
+        for color in xrange(0,12):
             word = np.uint8()
-            for kk in xrange(0,8):
-                if bit_array[kk,ii,jj]:
-                    word |= (0x01 << kk)
-            word_array[ii,jj] = word
+            for pin in xrange(0,8):
+                if pin_bulb_color[pin,bulb,color]:
+                    word |= (0x01 << pin)
+            bulb_color[bulb,color] = word
             s += struct.pack('B', word)
-    print word_array
+    print bulb_color
     return s
 
 if __name__=="__main__":
