@@ -34,24 +34,25 @@ def convert_image_for_arduino(filename):
     assert(cols == 64)
     assert(im.mode == "RGB")
     s = "OK"
-    bit_array = np.zeros((16,32,12),np.bool)
-    for strand in xrange(0,16):
+    pin_bulb_color = np.zeros((16,32,12),np.bool)
+    for pin in xrange(0,16):
         for row in xrange(0,rows):
             for localcol in xrange(0,4):
-                col = strand*4+localcol
-                strandindex = localcol*8+row
+                col = pin*4+localcol
+                bulb = localcol*8+row
                 (r0,g0,b0) = im.getpixel((col,row))
                 for bit in xrange(0,4):
-                    bit_array[strand,strandindex,  bit] = not (b0 & (0x01 << (4+bit)))
-                    bit_array[strand,strandindex,4+bit] = not (g0 & (0x01 << (4+bit)))
-                    bit_array[strand,strandindex,8+bit] = not (r0 & (0x01 << (4+bit)))
-    word_array = np.zeros((32,12),np.uint16)
-    for ii in xrange(0,32):
-        for jj in xrange(0,12):
+                    pin_bulb_color[pin,bulb,  bit] = not (b0 & (0x01 << (4+bit)))
+                    pin_bulb_color[pin,bulb,4+bit] = not (g0 & (0x01 << (4+bit)))
+                    pin_bulb_color[pin,bulb,8+bit] = not (r0 & (0x01 << (4+bit)))
+    bulb_color = np.zeros((32,12),np.uint16)
+    for bulb in xrange(0,32):
+        for color in xrange(0,12):
             word = np.uint16()
-            for kk in xrange(0,16):
-                if bit_array[kk,ii,jj]:
-                    word |= (0x01 << kk)
+            for pin in xrange(0,16):
+                if pin_bulb_color[pin,bulb,color]:
+                    word |= (0x01 << pin)
+            bulb_color[bulb,color] = word
             s += struct.pack('H', word)
     return s
 
