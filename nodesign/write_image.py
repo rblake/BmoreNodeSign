@@ -58,6 +58,7 @@ def convert_image_for_arduino(filename):
 
 if __name__=="__main__":
     import sys
-    print len(convert_image_for_arduino(sys.argv[1]))
+    image_bytes = convert_image_for_arduino(sys.argv[1])
+    print "".join("\\x%x" % ord(c) for c in image_bytes[2:])
     #arduino = open_arduino()
     #arduino.write(convert_image_for_arduino(sys.argv[1]))
