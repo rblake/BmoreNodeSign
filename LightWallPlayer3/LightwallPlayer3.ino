@@ -50,7 +50,23 @@ char stuff[] =
 
 void loop()
 {
-  
+  /*
+  // Code for measuring the timing of the output loop.
+  // We measured this with an oscilliscope to be 10us.
+  while (1) {
+    volatile byte zero = 0xFF;
+    OUT_VAR(zero,zero);
+    volatile byte one = 0x00;
+    OUT_VAR(one,one);
+  }
+
+
+  while (1) {
+    SAY_ONE;  _delay_ns(9480);
+    SAY_ZERO; _delay_ns(9480);
+  }
+  */
+
   int do_read = 0;
   while (1) {
     char O;
