@@ -33,7 +33,7 @@
 // Depending on the tolerances of individual bulbs you may need to adjust these.
 #define PREPARE_OUTPUT do { DDRD |= B11111110; DDRB |= B00101111; DDRC |= B00111111; } while(0)
 #define SAY_ONE      do { PORTD &= 0x03; PORTB &= 0xF0; PORTC &= 0xC0; } while(0)
-#define SAY_ZERO     do { PORTD |= 0xFC; PORTB |= 0x0F; PORTC &= 0x3F; } while(0)
+#define SAY_ZERO     do { PORTD |= 0xFC; PORTB |= 0x0F; PORTC |= 0x3F; } while(0)
 #define OUT_ONE      do { SAY_ONE; _delay_us(10); } while(0)
 #define OUT_ZERO     do { SAY_ZERO; _delay_us(10); } while(0)
 
