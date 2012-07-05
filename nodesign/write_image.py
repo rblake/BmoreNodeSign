@@ -58,7 +58,9 @@ def convert_image_for_arduino(filename):
 
 if __name__=="__main__":
     import sys
-    image_bytes = convert_image_for_arduino(sys.argv[1])
-    print "".join("\\x%x" % ord(c) for c in image_bytes[2:])
-    #arduino = open_arduino()
-    #arduino.write(convert_image_for_arduino(sys.argv[1]))
+    if sys.argv[1] == "--dump":
+        image_bytes = convert_image_for_arduino(sys.argv[2])
+        print "".join("\\x%x" % ord(c) for c in image_bytes[2:])
+    else:
+        arduino = open_arduino()
+        arduino.write(convert_image_for_arduino(sys.argv[1]))
