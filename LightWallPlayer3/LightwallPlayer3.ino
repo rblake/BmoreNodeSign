@@ -54,22 +54,25 @@ void loop()
   {
     byte assert_default_display[sizeof(stuff)/sizeof(stuff[0]) == 32*24];
   }
-  /*
-  // Code for measuring the timing of the output loop.
-  // We measured this with an oscilliscope to be 10us.
-  while (1) {
-    volatile byte zero = 0xFF;
-    OUT_VAR(zero,zero);
-    volatile byte one = 0x00;
-    OUT_VAR(one,one);
-  }
-
-
-  while (1) {
-    SAY_ONE;  _delay_ns(9480);
-    SAY_ZERO; _delay_ns(9480);
-  }
-  */
+  const bool test_pin_timings=false;
+  if (test_pin_timings) {
+    // Code for measuring the timing of the output loop.
+    // We measured this with an oscilliscope to be 10us.
+    const bool should_test_const = false;
+    if (should_test_const) {
+      while (1) {
+        volatile byte zero = 0xFF;
+        OUT_VAR(zero,zero);
+        volatile byte one = 0x00;
+        OUT_VAR(one,one);
+      }
+    } else {
+      while (1) {
+        SAY_ONE;  _delay_ns(9480);
+        SAY_ZERO; _delay_ns(9480);
+      }
+    }
+  } 
 
   bool do_read = false;
   while (1) {
