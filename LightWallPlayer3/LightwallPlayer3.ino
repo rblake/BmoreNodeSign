@@ -41,7 +41,7 @@ void demo();
 
 void setup() 
 {
-
+  Serial.begin(9600);
   LW.begin(32, 8);
 }
 
@@ -95,6 +95,7 @@ void loop()
         _delay_us(48);
       }
     }
+    do_read = true;
   }
 }
 
