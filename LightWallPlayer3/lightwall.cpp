@@ -58,7 +58,7 @@ void LightWall::begin(uint8_t lightsPerString, uint8_t lightsPerRow)
   //delay to catch serial com
   //DO NOT REMOVE THIS DELAY OR YOU WILL NOT BE ABLE TO REFLASH THE ARDUINO
   pinMode(13, OUTPUT);   
-  for (int i=0;i<20;i++) //Blink status led on board while we wait
+  for (int i=0;i<2;i++) //Blink status led on board while we wait
   {
     digitalWrite(13, HIGH);   
     delay(500);               
@@ -303,7 +303,7 @@ uint8_t LightWall::lightsPerRow()
 	  send_frame((((row+1)*LPR)-1)-(i%LPR));
     if ((i%LPR) == (LPR -1))
       row++;
-    delay(250);
+    delay(5);
   }
-  delay(3000);
+  delay(1000);
 }
