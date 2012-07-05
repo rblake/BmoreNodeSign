@@ -121,7 +121,7 @@ void LightWall::fadein(uint16_t time, uint8_t newIntensity)
 //Sets screen to black
 void LightWall::blank_screen()
 {
-  for (int i=0;i<12;i++)
+  for (int i=0;i<24;i++)
   {  Buffer[i]=0xFF;  }
   for(int i=0;i<LPS;i++)
   {
