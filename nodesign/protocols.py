@@ -3,41 +3,11 @@ import collections
 from twisted.protocols.stateful import StatefulProtocol
 from twisted.internet.protocol import Protocol
 from twisted.internet.task import LoopingCall
+import write_image
 import pygame
 import numpy as np
 
-class SignProtocol(StatefulProtocol):
-    alignment = "OK"
-
-    def __init__(self, dims=(64, 16)):
-        x, y = dims
-        self.frame_size = x * y + len(self.alignment)
-        self._last_char = "" # To be used for realigning
-
-    def get_frame(self, msg):
-        data = msg[:-2]
-        check = msg[-2:]
-        if check != self.alignment:
-            return self._realign(), 1
-        #actually display the frame
-
-    def _realign(self, msg):
-        if self._last_char + msg == self.alignment:
-            self._last_char = ""
-            return self.get_frame, self.frame_size
-        self._last_char = msg
-        return self._realign, 1
-    
-    def getInitialState(self):
-        return self.get_frame, self.frame_size
-
-    def send_frame(self, frame):
-        self.transport.write(frame)
-        self.transport.write(self.alignment)
-
 class _BaseSignDriverProtocol(Protocol):
-    alignment = "OK"
-
     def __init__(self, framerate, dims=(64, 8)):
         self.width, self.height = dims
         self._frame_buffer = collections.deque()
@@ -48,12 +18,15 @@ class _BaseSignDriverProtocol(Protocol):
         if self._frame_buffer:
             self._display_now(self._frame_buffer.popleft())
         
-    def send_frame(self, frame):
-        self.frame_buffer.append(frame)
+    def dataReceived(self, frame):
+        self._frame_buffer.append(frame)
 
 class SignDriver(_BaseSignDriverProtocol):
+    def __init__(self, framerate, dims=(64,8)):
+        _BaseSignDriverProtocol.__init__(self, framerate, dims)
+        
     def _display_now(self, frame):
-        self.transport.writeSequence([frame, self.alignment])
+        self.transport.write(write_image.convert_frame_for_arduino(frame))
 
 class InMemorySignDriver(_BaseSignDriverProtocol):
     def __init__(self, framerate, pixel_size, dims=(64, 8)):

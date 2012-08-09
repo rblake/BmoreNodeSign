@@ -8,7 +8,7 @@ import numpy as np
 WIDTH=64
 HEIGHT=8
 
-def open_arduino():
+def find_arduino():
     locations=['/dev/ttyUSB0','/dev/ttyUSB1','/dev/ttyUSB2','/dev/ttyUSB3',  
                '/dev/ttyS0','/dev/ttyS1','/dev/ttyS2','/dev/ttyS3',
                'COM1', 'COM2', 'COM3', 'COM4', 'COM5', 'COM6', 'COM7', 'COM8']
@@ -20,13 +20,19 @@ def open_arduino():
 
     for device in locations:    
         try:    
-            print "Trying...",device  
+            print "Trying...",device
+            #FIXME, opening this up is a kludge
             arduino = serial.Serial(device, 9600)
-            return arduino
+            del arduino
+            return device
         except:    
             print "Failed to connect on",device     
     print "Could not find arduino!"
     return None
+    
+
+def open_arduino(baud=9600):
+    return serial.Serial(find_arduino(), baud)
 
 def convert_frame_for_arduino(frame):
     this_frame = np.reshape(
