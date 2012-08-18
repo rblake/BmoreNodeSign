@@ -59,7 +59,6 @@ class LightDisplayClient(NetstringReceiver):
         self._sizeDeferred = defer.Deferred()
 
     def stringReceived(self, frame):
-        print "CLIENT_BEGIN", frame, "CLIENT_END"
         if not self._sizeDeferred.called:
             m = re.match(r'WIDTH (\d+) HEIGHT (\d+)\n', frame)
             if m:
@@ -87,7 +86,6 @@ class LightDisplayServer(NetstringReceiver):
         self.sendString("WIDTH %d HEIGHT %d\n" % (self._lightDisplay.width, self._lightDisplay.height))
 
     def stringReceived(self, data):
-        print "SERVER_BEGIN",data[0:3], len(data),"SERVER_END"
         if data==_acquire_req:
             d = self._lightDisplay.d_acquire()
             d.addCallback(self.acquireCallback)

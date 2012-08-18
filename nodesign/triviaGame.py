@@ -26,7 +26,7 @@ class Effects:
         return self.surface.copy()
 
     def fill_screen(self,color):
-        frame = self.copy_display()
+        frame = self.surface
         frame.fill(color)
         yield frame
 
@@ -79,8 +79,6 @@ def trivia_game(d_lights):
         yield lights.d_acquire()
         for f in e.fill_screen(background): lights.d_display(f)
         tq = database[tq_index]
-        for f in e.marquee(ttt.render_text_bitmap(tq.question), direction="left",begin="right",end="left"): lights.d_display(f)
-
         for f in e.marquee(ttt.render_text_bitmap(tq.question), direction="left",begin="right",end="left"): lights.d_display(f)
         yield lights.d_waitForDisplay()
         for choice in tq.choices:
