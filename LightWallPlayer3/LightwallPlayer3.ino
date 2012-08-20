@@ -39,10 +39,13 @@ LightWall LW;
 
 void demo();
 
+const int lights_per_row = 8;
+const int lights_per_string = 32;
+
 void setup() 
 {
-  Serial.begin(9600);
-  LW.begin(32, 8);
+  Serial.begin(115200);
+  LW.begin(lights_per_string, lights_per_row);
 }
 
 byte stuff[] =
@@ -52,7 +55,7 @@ byte stuff[] =
 void loop()
 {
   {
-    byte assert_default_display[sizeof(stuff)/sizeof(stuff[0]) == 32*24];
+    byte assert_default_display[sizeof(stuff)/sizeof(stuff[0]) == lights_per_string*24];
   }
   const bool test_pin_timings=false;
   if (test_pin_timings) {
@@ -83,7 +86,7 @@ void loop()
       K = Serial.read();
     }
     if (!do_read || O == 'O' && K == 'K') {
-      for (int ii=0; ii<32; ii++) {
+      for (int ii=0; ii<lights_per_string; ii++) {
         for (int jj=0; jj<24; jj++) {
           if (do_read) {
             LW.Buffer[jj]=Serial.read();
