@@ -207,7 +207,7 @@ void loop()
         _delay_us(48);
       }
     }
-    do_read = true;
+    do_read = false;
   }
 }
 
