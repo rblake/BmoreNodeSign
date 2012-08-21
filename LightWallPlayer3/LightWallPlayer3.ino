@@ -113,15 +113,24 @@ void loop()
 
   bool do_read = false;
   while (1) {
-    byte O;
-    byte K;
     if (do_read) {
-      do { O = Serial.read(); } while (O != 'O');
-      do { K = Serial.read(); } while (K != 'K');
+      //search for an "OK"
+      bool found_ok = false;
+      while (!found_ok) {
+        while (Serial.available() < 2) {}
+        byte O = Serial.read();
+        if (O == 'O') {
+          byte K = Serial.read();
+          if (K == 'K') {
+            found_ok = true;
+          }
+        }
+      }
     }
     for (int ii=0; ii<lights_per_string; ii++) {
       for (int jj=0; jj<24; jj++) {
         if (do_read) {
+          while (Serial.available() < 1) {}
           LW.Buffer[jj]=Serial.read();
         } else {
           LW.Buffer[jj]=default_display[ii*24+jj];

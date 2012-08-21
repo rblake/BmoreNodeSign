@@ -2,6 +2,7 @@
 
 import os.path
 
+from twisted.internet.serialport import SerialPort
 from twisted.protocols.basic import NetstringReceiver
 from twisted.internet.protocol import Protocol,Factory
 from twisted.internet.task import LoopingCall
@@ -176,9 +177,8 @@ class SingleSignDisplay(_BaseLightDisplay):
 
 class ArduinoProtocol(Protocol):
     def __init__(self, serial_port):
-        Protocol.__init__(self)
-        self.d_myName = Deferred()
-        SerialPort(USBClient(), serial_port, reactor, baudrate='115200')
+        self.d_myName = defer.Deferred()
+        SerialPort(self, serial_port, reactor, baudrate='115200')
 
     def dataReceived(self, data):
         m = re.match(r'(\d+)',data)
@@ -200,6 +200,6 @@ class LightDisplayClientFactory(Factory):
         return LightDisplayClient()
 
 if __name__=="__main__":
-    lightDisplay = InMemoryDisplay(16,30)
+    lightDisplay = SingleSignDisplay(10)
     reactor.listenTCP(1234, LightDisplayServerFactory(lightDisplay))
     reactor.run()
