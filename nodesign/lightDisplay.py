@@ -200,6 +200,6 @@ class LightDisplayClientFactory(Factory):
         return LightDisplayClient()
 
 if __name__=="__main__":
-    lightDisplay = SingleSignDisplay(10)
+    lightDisplay = InMemoryDisplay(16,30)
     reactor.listenTCP(1234, LightDisplayServerFactory(lightDisplay))
     reactor.run()
