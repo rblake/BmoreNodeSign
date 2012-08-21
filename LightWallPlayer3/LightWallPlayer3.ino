@@ -111,8 +111,16 @@ void loop()
     }
   } 
 
-  bool do_read = false;
   while (1) {
+    for (int ii=0; ii<lights_per_string; ii++) {
+      for (int jj=0; jj<24; jj++) {
+        LW.Buffer[jj]=default_display[ii*24+jj];
+      }
+      LW.send_frame(ii);
+      _delay_us(48);
+    }
+
+    const bool do_read = true;
     if (do_read) {
       //search for an "OK"
       bool found_ok = false;
@@ -126,20 +134,13 @@ void loop()
           }
         }
       }
-    }
-    for (int ii=0; ii<lights_per_string; ii++) {
-      for (int jj=0; jj<24; jj++) {
-        if (do_read) {
+      for (int ii=0; ii<lights_per_string; ii++) {
+        for (int jj=0; jj<24; jj++) {
           while (Serial.available() < 1) {}
-          LW.Buffer[jj]=Serial.read();
-        } else {
-          LW.Buffer[jj]=default_display[ii*24+jj];
+          default_display[ii*24+jj]=Serial.read();
         }
       }
-      LW.send_frame(ii);
-      _delay_us(48);
     }
-    do_read = true;
   }
 }
 
