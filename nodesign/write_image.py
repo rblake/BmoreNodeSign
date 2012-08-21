@@ -91,7 +91,8 @@ if __name__=="__main__":
     import sys
     if sys.argv[1] == "--dump":
         image_bytes = convert_image_for_arduino(sys.argv[2])
-        print "".join("\\x%x" % ord(c) for c in image_bytes[2:])
+        for start in xrange(2,len(image_bytes),24):
+            print '"'+"".join("\\x%02x" % ord(c) for c in image_bytes[start:start+24])+'"'
     elif sys.argv[1] == "--topipe":
         print convert_image_to_frame(sys.argv[2]),
     else:
