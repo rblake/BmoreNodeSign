@@ -120,7 +120,7 @@ class _BaseLightDisplay:
     def release(self):
         self._accessQueue.popleft()
         if self._accessQueue:
-            self._displayFinished.chainDeferred(self.accessQueue[0])
+            self._displayFinished.chainDeferred(self._accessQueue[0])
 
     def _displayNext(self):
         if self._frameBuffer:
