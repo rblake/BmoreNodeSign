@@ -42,20 +42,19 @@ def convert_frame_for_arduino(frame):
             count=WIDTH * HEIGHT * 3),
         (WIDTH, HEIGHT, 3)
         )
-    this_frame = True
     s = "OK"
     pin_bulb_color = np.zeros((16,24,12),np.bool)
-    for pin in xrange(0,12):
-        for row in xrange(0,HEIGHT):
-            for col in xrange(0,WIDTH):
-                bulb = col
-                r0 = this_frame[col, row, 0]
-                g0 = this_frame[col, row, 1]
-                b0 = this_frame[col, row, 2]
-                for bit in xrange(0,4):
-                    pin_bulb_color[pin,bulb,  bit] = not (b0 & (0x01 << (4+bit)))
-                    pin_bulb_color[pin,bulb,4+bit] = not (g0 & (0x01 << (4+bit)))
-                    pin_bulb_color[pin,bulb,8+bit] = not (r0 & (0x01 << (4+bit)))
+    for row in xrange(0,HEIGHT):
+        for col in xrange(0,WIDTH):
+            pin = col
+            bulb = row
+            r0 = this_frame[col, row, 0]
+            g0 = this_frame[col, row, 1]
+            b0 = this_frame[col, row, 2]
+            for bit in xrange(0,4):
+                pin_bulb_color[pin,bulb,  bit] = not (b0 & (0x01 << (4+bit)))
+                pin_bulb_color[pin,bulb,4+bit] = not (g0 & (0x01 << (4+bit)))
+                pin_bulb_color[pin,bulb,8+bit] = not (r0 & (0x01 << (4+bit)))
     bulb_color = np.zeros((24,12),np.uint16)
     for bulb in xrange(0,24):
         for color in xrange(0,12):
