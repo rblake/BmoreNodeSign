@@ -116,21 +116,19 @@ void loop()
     byte O;
     byte K;
     if (do_read) {
-      O = Serial.read();
-      K = Serial.read();
+      do { O = Serial.read(); } while (O != 'O');
+      do { K = Serial.read(); } while (K != 'K');
     }
-    if (!do_read || O == 'O' && K == 'K') {
-      for (int ii=0; ii<lights_per_string; ii++) {
-        for (int jj=0; jj<24; jj++) {
-          if (do_read) {
-            LW.Buffer[jj]=Serial.read();
-          } else {
-            LW.Buffer[jj]=default_display[ii*24+jj];
-          }
+    for (int ii=0; ii<lights_per_string; ii++) {
+      for (int jj=0; jj<24; jj++) {
+        if (do_read) {
+          LW.Buffer[jj]=Serial.read();
+        } else {
+          LW.Buffer[jj]=default_display[ii*24+jj];
         }
-        LW.send_frame(ii);
-        _delay_us(48);
       }
+      LW.send_frame(ii);
+      _delay_us(48);
     }
     do_read = true;
   }
