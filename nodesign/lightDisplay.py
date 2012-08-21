@@ -2,6 +2,7 @@
 
 import os.path
 
+from twisted.internet.serialport import SerialPort
 from twisted.protocols.basic import NetstringReceiver
 from twisted.internet.protocol import Protocol,Factory
 from twisted.internet.task import LoopingCall
@@ -120,7 +121,7 @@ class _BaseLightDisplay:
     def release(self):
         self._accessQueue.popleft()
         if self._accessQueue:
-            self._displayFinished.chainDeferred(self.accessQueue[0])
+            self._displayFinished.chainDeferred(self._accessQueue[0])
 
     def _displayNext(self):
         if self._frameBuffer:
@@ -164,16 +165,28 @@ class InMemoryDisplay(_BaseLightDisplay):
         pygame.display.flip()
         
 
-class SingleSignDisplay(_BaseLightDisplay,Protocol):
+class SingleSignDisplay(_BaseLightDisplay):
     def __init__(self, fps, dims=(64,8)):
         _BaseLightDisplay.__init__(self, fps, dims)
-        Protocol.__init__(self)
-        serial_port = write_image.find_arduino()
-        SerialPort(USBClient(), serial_port, reactor, baudrate='19200')
+        #serial_port = write_image.find_arduino()
+        serial_port = "/dev/ttyUSB0"
+        self.arduino = ArduinoProtocol(serial_port)
 
     def _displayNow(self, frame):
-        self.transport.write(write_image.convert_frame_for_arduino(frame))
+        self.arduino.sendData(write_image.convert_frame_for_arduino(frame))
 
+class ArduinoProtocol(Protocol):
+    def __init__(self, serial_port):
+        self.d_myName = defer.Deferred()
+        SerialPort(self, serial_port, reactor, baudrate='115200')
+
+    def dataReceived(self, data):
+        m = re.match(r'(\d+)',data)
+        if m:
+            self.d_myName.callback(int(m.group(1)))
+
+    def sendData(self, data):
+        self.transport.write(data)
 
 class LightDisplayServerFactory(Factory):
     def __init__(self, lightDisplay):

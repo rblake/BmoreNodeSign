@@ -103,28 +103,36 @@ void loop()
     }
   } 
 
-  bool do_read = false;
   while (1) {
-    byte O;
-    byte K;
-    if (do_read) {
-      O = Serial.read();
-      K = Serial.read();
+    for (int ii=0; ii<lights_per_string; ii++) {
+      for (int jj=0; jj<24; jj++) {
+        LW.Buffer[jj]=default_display[ii*24+jj];
+      }
+      LW.send_frame(ii);
+      _delay_us(48);
     }
-    if (!do_read || O == 'O' && K == 'K') {
-      for (int ii=0; ii<lights_per_string; ii++) {
-        for (int jj=0; jj<24; jj++) {
-          if (do_read) {
-            LW.Buffer[jj]=Serial.read();
-          } else {
-            LW.Buffer[jj]=default_display[ii*24+jj];
+
+    const bool do_read = false;
+    if (do_read) {
+      //search for an "OK"
+      bool found_ok = false;
+      while (!found_ok) {
+        while (Serial.available() < 2) {}
+        byte O = Serial.read();
+        if (O == 'O') {
+          byte K = Serial.read();
+          if (K == 'K') {
+            found_ok = true;
           }
         }
-        LW.send_frame(ii);
-        _delay_us(48);
+      }
+      for (int ii=0; ii<lights_per_string; ii++) {
+        for (int jj=0; jj<24; jj++) {
+          while (Serial.available() < 1) {}
+          default_display[ii*24+jj]=Serial.read();
+        }
       }
     }
-    do_read = false;
   }
 }
 
