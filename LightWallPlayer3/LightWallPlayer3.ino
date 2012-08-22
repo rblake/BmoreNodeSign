@@ -115,8 +115,6 @@ void loop()
   goto enter_loop;
 
   while (1) {
-    Serial.println("OK");
-
     for (int ii=0; ii<lights_per_string; ii++) {
       for (int jj=0; jj<24; jj++) {
         LW.Buffer[jj]=default_display[ii*24+jj];
@@ -127,6 +125,7 @@ void loop()
 
     const bool do_read = true;
     if (do_read) {
+      Serial.println("OK\n");
       //search for an "OK"
       bool found_ok = false;
       while (!found_ok) {
