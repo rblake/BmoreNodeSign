@@ -29,6 +29,7 @@ class LightDisplayClient(NetstringReceiver):
     def __init__(self):
         self._frameBuffer = collections.deque()
         self._accessQueue = collections.deque()
+        self._displayFinished = defer.succeed(None)
 
     def d_size(self):
         return self._sizeDeferred
@@ -53,6 +54,7 @@ class LightDisplayClient(NetstringReceiver):
         stringified_frame = arr.tostring()
         self.sendString(_display_req+stringified_frame)
         self._frameBuffer.append(d)
+        return d
 
     def connectionMade(self):
         NetstringReceiver.connectionMade(self)
@@ -108,8 +110,8 @@ class _BaseLightDisplay:
         self._fps = fps
         self._frameBuffer = collections.deque()
         self._accessQueue = collections.deque()
-        self._loopingCall = LoopingCall(self._displayNext)
-        self._loopingCall.start(1.0/ self._fps)
+        self._displayFinished = defer.succeed(None)
+        self._readyForNextDisplay = defer.succeed(None)
 
     def d_acquire(self):
         d = defer.Deferred()
@@ -123,21 +125,33 @@ class _BaseLightDisplay:
         if self._accessQueue:
             self._displayFinished.chainDeferred(self._accessQueue[0])
 
-    def _displayNext(self):
-        if self._frameBuffer:
-            #display the client frame.
-            frame, d = self._frameBuffer.popleft()
-            self._displayNow(frame)
-            d.callback(None)
-            if not self._frameBuffer:
-                self._displayFinished.callback(None)
-
     def d_display(self, frame):
-        if not self._frameBuffer:
-            self._displayFinished = defer.Deferred()
         d = defer.Deferred()
         self._frameBuffer.append((frame, d))
+        if len(self._frameBuffer) == 1:
+            self._displayFinished = defer.Deferred()
+            self._readyForNextDisplay.addCallback(self._displayNext)
         return d
+
+    def _displayNext(self, unused):
+        d_pause = self.d_minWaitBetweenFrames()
+        frame, d = self._frameBuffer.popleft()
+        d_display = self._d_displayNow(frame)
+        d_display.chainDeferred(d)
+        d_display.addCallback(self.finishDisplay)
+        
+        self._readyForNextDisplay = defer.gatherResults([d_pause,d_display])
+        if self._frameBuffer:
+            self._readyForNextDisplay.addCallback(self._displayNext)
+
+    def d_minWaitBetweenFrames(self):
+        d = d_wait(1.0/self._fps)
+        return d
+
+    def finishDisplay(self, unused):
+        if not self._frameBuffer:
+            self._displayFinished.callback(None)
+
 
 class InMemoryDisplay(_BaseLightDisplay):
     def __init__(self, pixelSize, fps, dims=(64,8)):
@@ -146,8 +160,8 @@ class InMemoryDisplay(_BaseLightDisplay):
             (self.width * pixelSize, self.height * pixelSize)
         )
         self.smallScreen = pygame.Surface((self.width,self.height))
-        
-    def _displayNow(self, frame):
+
+    def _d_displayNow(self, frame):
         thisFrame = np.reshape(
             np.fromstring(
                 frame,
@@ -163,7 +177,7 @@ class InMemoryDisplay(_BaseLightDisplay):
             self.screen
         )
         pygame.display.flip()
-        
+        return defer.succeed(None)
 
 class SingleSignDisplay(_BaseLightDisplay):
     def __init__(self, fps, dims=(64,8)):
@@ -172,21 +186,29 @@ class SingleSignDisplay(_BaseLightDisplay):
         serial_port = "/dev/ttyUSB0"
         self.arduino = ArduinoProtocol(serial_port)
 
-    def _displayNow(self, frame):
-        self.arduino.sendData(write_image.convert_frame_for_arduino(frame))
+    def _d_displayNow(self, frame):
+        return self.arduino.d_sendData(write_image.convert_frame_for_arduino(frame))
 
 class ArduinoProtocol(Protocol):
     def __init__(self, serial_port):
         self.d_myName = defer.Deferred()
         SerialPort(self, serial_port, reactor, baudrate='115200')
+        self._frameQueue = collections.deque()
 
     def dataReceived(self, data):
         m = re.match(r'(\d+)',data)
         if m:
             self.d_myName.callback(int(m.group(1)))
+        elif data[0:2] == "OK":
+            if self._frameQueue:
+                d = self._frameQueue.popleft()
+                d.callback(None)
 
-    def sendData(self, data):
+    def d_sendData(self, data):
+        d = defer.Deferred()
+        self._frameQueue.append(d)
         self.transport.write(data)
+        return d
 
 class LightDisplayServerFactory(Factory):
     def __init__(self, lightDisplay):
