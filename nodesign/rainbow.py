@@ -30,7 +30,8 @@ def rainbow(d_lights):
                     pixels[x,y,2] = int(255*b)
             pygame.surfarray.blit_array(surf,pixels)
             lights.d_display(surf)
-        lights.release()        
+            yield d_wait(0)
+        lights.release()
 
 if __name__=="__main__":
     point = TCP4ClientEndpoint(reactor, "localhost", 1234)

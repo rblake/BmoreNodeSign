@@ -117,7 +117,7 @@ class _BaseLightDisplay:
         d = defer.Deferred()
         self._accessQueue.append(d)
         if len(self._accessQueue)==1:
-            d.callback(None)
+            self._displayFinished.chainDeferred(self._accessQueue[0])
         return d
 
     def release(self):
