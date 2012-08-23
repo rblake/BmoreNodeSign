@@ -6,14 +6,35 @@ from lightDisplay import LightDisplayClientFactory, d_wait
 from twisted.internet import reactor, defer
 from twisted.internet.endpoints import TCP4ClientEndpoint
 
+def pixelize(l):
+    return (l[0],l[1],l[2])
+
 class TextRenderer:
     def __init__(self):
-        self.font = pygame.image.load("8x8font.png")
-    
+        self.font = pygame.image.load("8bitfont.png")
+        font_width = self.font.get_width()
+        array = pygame.surfarray.array3d(self.font)
+        self._font_offset = {}
+        offset=0
+        for c in xrange(32,127):
+            width = 1
+            while offset+width < font_width and pixelize(array[offset+width,0,:]) != (255,0,0):
+                width += 1
+            self._font_offset[chr(c)] = (offset,width)
+            offset += width
+
     def render_text_bitmap(self, text):
-        rendered_text = pygame.Surface((len(text)*8,8))
-        for ii in xrange(0,len(text)):
-            rendered_text.blit(self.font, (ii*8,0), area=pygame.Rect(ord(text[ii])*8,0,8,8))
+        string_width = len(text)-1
+        for t in text:
+            (offset,width) = self._font_offset[t]
+            string_width += width
+        rendered_text = pygame.Surface((string_width,8))
+        cursor=0
+        for t in text:
+            (offset,width) = self._font_offset[t]
+            rendered_text.blit(self.font, (cursor,0), area=pygame.Rect(offset,1,width,8))
+            cursor += width+1
+
         return rendered_text
 
 class Effects:
@@ -72,7 +93,7 @@ def trivia_game(d_lights):
                 ]
     tq_index = 0
     width, height = yield lights.d_size()
-    background = (255,255,255)
+    background = (0,0,0)
     e = Effects(width,height)
     ttt = TextRenderer()
     while True:
