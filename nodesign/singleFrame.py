@@ -14,6 +14,7 @@ def singleFrame(d_lights, image):
     f = pygame.image.load(image)
     yield lights.d_display(f)
     lights.release()
+    reactor.stop()
 
 if __name__=="__main__":
     import sys
