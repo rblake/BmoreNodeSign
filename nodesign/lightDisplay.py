@@ -83,6 +83,8 @@ class LightDisplayClient(NetstringReceiver):
 class LightDisplayServer(NetstringReceiver):
     def __init__(self, lightDisplay):
         self._lightDisplay = lightDisplay
+        self._haveDisplay = False
+        self._mutexTicket = None
 
     def connectionMade(self):
         NetstringReceiver.connectionMade(self)
@@ -92,17 +94,31 @@ class LightDisplayServer(NetstringReceiver):
         if data==_acquire_req:
             d = self._lightDisplay.d_acquire()
             d.addCallback(self.acquireCallback)
+            self._mutexTicket = d
         elif data==_release_req:
-            self._lightDisplay.release()
+            self.release()
         elif data[0:len(_display_req)]==_display_req:
             frame = data[len(_display_req):]
             self._lightDisplay.d_display(frame).addCallback(self.displayCallback)
 
     def acquireCallback(self, result):
+        self._haveDisplay = True
         self.sendString(_acquire_ack)
 
     def displayCallback(self, result):
         self.sendString(_display_ack)
+
+    def release(self):
+        self._haveDisplay = False
+        self._lightDisplay.release()
+        self._mutexTicket = None
+
+    def connectionLost(self, reason):
+        if self._haveDisplay:
+            self.release()
+        elif self._mutexTicket != None:
+            self._lightDisplay.discardTicket(self._mutexTicket)
+            self._mutexTicket = None
 
 class _BaseLightDisplay:
     def __init__(self, fps, dims):
@@ -151,6 +167,9 @@ class _BaseLightDisplay:
     def finishDisplay(self, unused):
         if not self._frameBuffer:
             self._displayFinished.callback(None)
+
+    def discardTicket(self, mutexDeferred):
+        self._accessQueue.remove(mutexDeferred)
 
 
 class InMemoryDisplay(_BaseLightDisplay):
