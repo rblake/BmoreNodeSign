@@ -112,8 +112,6 @@ void loop()
   } 
 
 
-  goto enter_loop;
-
   while (1) {
     for (int ii=0; ii<lights_per_string; ii++) {
       for (int jj=0; jj<24; jj++) {
@@ -125,7 +123,7 @@ void loop()
 
     const bool do_read = true;
     if (do_read) {
-      Serial.println("OK\n");
+      Serial.println("OK");
       //search for an "OK"
       bool found_ok = false;
       while (!found_ok) {

@@ -3,7 +3,7 @@
 import os.path
 
 from twisted.internet.serialport import SerialPort
-from twisted.protocols.basic import NetstringReceiver
+from twisted.protocols.basic import NetstringReceiver,LineReceiver
 from twisted.internet.protocol import Protocol,Factory
 from twisted.internet.task import LoopingCall
 from twisted.internet import reactor, defer
@@ -208,13 +208,14 @@ class SingleSignDisplay(_BaseLightDisplay):
     def _d_displayNow(self, frame):
         return self.arduino.d_sendData(write_image.convert_frame_for_arduino(frame))
 
-class ArduinoProtocol(Protocol):
+class ArduinoProtocol(LineReceiver):
     def __init__(self, serial_port):
+        self.setLineMode()
         self.d_myName = defer.Deferred()
         SerialPort(self, serial_port, reactor, baudrate='115200')
         self._frameQueue = collections.deque()
-
-    def dataReceived(self, data):
+        
+    def lineReceived(self, data):
         m = re.match(r'(\d+)',data)
         if m:
             self.d_myName.callback(int(m.group(1)))
