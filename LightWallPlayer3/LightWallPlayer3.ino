@@ -81,7 +81,7 @@ byte default_display[] =
 
 void setup() 
 {
-  Serial.begin(115200);
+  Serial.begin(500000);
   LW.begin(lights_per_string, lights_per_row);
   Serial.println(ARDUINO_ID);
 }

@@ -212,9 +212,13 @@ class ArduinoProtocol(LineReceiver):
     def __init__(self, serial_port):
         self.setLineMode()
         self.d_myName = defer.Deferred()
-        SerialPort(self, serial_port, reactor, baudrate='115200')
+        SerialPort(self, serial_port, reactor, baudrate='500000')
         self._frameQueue = collections.deque()
         
+    #def dataReceived(self,data):
+    #    print repr(data)
+    #    LineReceiver.dataReceived(self, data)
+
     def lineReceived(self, data):
         m = re.match(r'(\d+)',data)
         if m:
