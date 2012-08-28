@@ -95,8 +95,8 @@ void loop()
   if (test_pin_timings) {
     // Code for measuring the timing of the output loop.
     // We measured this with an oscilliscope to be 10us.
-    const bool should_test_const = false;
-    if (should_test_const) {
+    const bool should_test_var = false;
+    if (should_test_var) {
       while (1) {
         volatile byte zero = 0xFF;
         OUT_VAR(zero,zero);
@@ -105,8 +105,8 @@ void loop()
       }
     } else {
       while (1) {
-        SAY_ONE;  _delay_ns(9480);
-        SAY_ZERO; _delay_ns(9480);
+        OUT_ONE;
+        OUT_ZERO;
       }
     }
   } 
