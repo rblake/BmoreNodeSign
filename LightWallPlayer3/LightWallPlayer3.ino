@@ -73,7 +73,7 @@ byte default_display[] =
 
 void setup() 
 {
-  Serial.begin(115200);
+  Serial.begin(500000);
   LW.begin(lights_per_string, lights_per_row);
   Serial.println(ARDUINO_ID);
 }
@@ -87,8 +87,8 @@ void loop()
   if (test_pin_timings) {
     // Code for measuring the timing of the output loop.
     // We measured this with an oscilliscope to be 10us.
-    const bool should_test_const = false;
-    if (should_test_const) {
+    const bool should_test_var = false;
+    if (should_test_var) {
       while (1) {
         volatile byte zero = 0xFF;
         OUT_VAR(zero,zero);
@@ -97,11 +97,12 @@ void loop()
       }
     } else {
       while (1) {
-        SAY_ONE;  _delay_ns(9480);
-        SAY_ZERO; _delay_ns(9480);
+        OUT_ONE;
+        OUT_ZERO;
       }
     }
   } 
+
 
   while (1) {
     for (int ii=0; ii<lights_per_string; ii++) {
@@ -114,6 +115,7 @@ void loop()
 
     const bool do_read = false;
     if (do_read) {
+      Serial.println("OK");
       //search for an "OK"
       bool found_ok = false;
       while (!found_ok) {
