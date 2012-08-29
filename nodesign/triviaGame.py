@@ -10,8 +10,8 @@ def pixelize(l):
     return (l[0],l[1],l[2])
 
 class TextRenderer:
-    def __init__(self):
-        self.font = pygame.image.load("8bitfont.png")
+    def __init__(self, imagefile="8bitfont.png"):
+        self.font = pygame.image.load(imagefile)
         font_width = self.font.get_width()
         array = pygame.surfarray.array3d(self.font)
         self._font_offset = {}
