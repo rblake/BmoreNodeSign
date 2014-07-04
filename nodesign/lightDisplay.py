@@ -173,7 +173,7 @@ class _BaseLightDisplay:
 
 
 class InMemoryDisplay(_BaseLightDisplay):
-    def __init__(self, pixelSize, fps, dims=(64,8)):
+    def __init__(self, pixelSize, fps, dims=(47,24)):
         _BaseLightDisplay.__init__(self, fps, dims)
         self.screen = pygame.display.set_mode(
             (self.width * pixelSize, self.height * pixelSize)
@@ -199,7 +199,7 @@ class InMemoryDisplay(_BaseLightDisplay):
         return defer.succeed(None)
 
 class SingleSignDisplay(_BaseLightDisplay):
-    def __init__(self, fps, dims=(64,8)):
+    def __init__(self, fps, dims=(47,24)):
         _BaseLightDisplay.__init__(self, fps, dims)
         #serial_port = write_image.find_arduino()
         serial_port = "/dev/ttyUSB0"

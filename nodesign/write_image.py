@@ -5,8 +5,8 @@ import serial
 import struct
 import numpy as np
 
-WIDTH=64
-HEIGHT=8
+WIDTH=47
+HEIGHT=24
 
 def find_arduino():
     locations=['/dev/ttyUSB0','/dev/ttyUSB1','/dev/ttyUSB2','/dev/ttyUSB3',  
@@ -42,29 +42,37 @@ def convert_frame_for_arduino(frame):
             count=WIDTH * HEIGHT * 3),
         (WIDTH, HEIGHT, 3)
         )
+
+    # Image like [AAAA BBB ]  needs to become
+    # [ AAAA ]
+    # [ BBB0 ]
+    numStrings=48
+    lightsPerString=24
+    separated_frame = np.zeros((lightsPerString,numStrings,3),dtype=np.uint8)
+    left_strand_count = 24 #change this to 23 depending on orientation.
+    right_strand_count = (WIDTH-left_strand_count)
+    separated_frame[0:left_strand_count,0:24,:] = this_frame[0:left_strand_count,:,:]
+    separated_frame[0:right_strand_count,24:48,:] = this_frame[left_strand_count:WIDTH,:,:]
+
     s = "OK"
-    pin_bulb_color = np.zeros((16,32,12),np.bool)
-    for pin in xrange(0,16):
-        for row in xrange(0,HEIGHT):
-            for localcol in xrange(0,4):
-                col = pin*4+localcol
-                bulb = localcol*HEIGHT+row
-                r0 = this_frame[col, row, 0]
-                g0 = this_frame[col, row, 1]
-                b0 = this_frame[col, row, 2]
-                for bit in xrange(0,4):
-                    pin_bulb_color[pin,bulb,  bit] = not (b0 & (0x01 << (4+bit)))
-                    pin_bulb_color[pin,bulb,4+bit] = not (g0 & (0x01 << (4+bit)))
-                    pin_bulb_color[pin,bulb,8+bit] = not (r0 & (0x01 << (4+bit)))
-    bulb_color = np.zeros((32,12),np.uint16)
-    for bulb in xrange(0,32):
+    pin_bulb_color = np.zeros((numStrings,lightsPerString,12),np.bool)
+    for pin in xrange(0,numStrings):
+        for bulb in xrange(0,lightsPerString):
+            r0 = separated_frame[bulb, pin, 0]
+            g0 = separated_frame[bulb, pin, 1]
+            b0 = separated_frame[bulb, pin, 2]
+            for bit in xrange(0,4):
+                pin_bulb_color[pin,bulb,  bit] = not (b0 & (0x01 << (4+bit)))
+                pin_bulb_color[pin,bulb,4+bit] = not (g0 & (0x01 << (4+bit)))
+                pin_bulb_color[pin,bulb,8+bit] = not (r0 & (0x01 << (4+bit)))
+    for bulb in xrange(0,lightsPerString):
         for color in xrange(0,12):
-            word = np.uint16()
-            for pin in xrange(0,16):
-                if pin_bulb_color[pin,bulb,color]:
-                    word |= (0x01 << pin)
-            bulb_color[bulb,color] = word
-            s += struct.pack('H', word)
+            for byte in xrange(0,numStrings,8):
+                data = np.uint8()
+                for pin in xrange(0, 8):
+                    if pin_bulb_color[byte+pin,bulb,color]:
+                        data |= (0x01 << pin)
+                s += struct.pack('B', data)
     return s
 
 def convert_image_to_frame(filename):
