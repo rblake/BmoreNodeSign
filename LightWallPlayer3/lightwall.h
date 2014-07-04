@@ -31,16 +31,116 @@
 
 // These are used to adjust the internal timings during output.
 // Depending on the tolerances of individual bulbs you may need to adjust these.
-#define BYTES_PER_OUTPUT 2
+
+#undef USE_SANE_OUTPUTS
+
+#ifdef USE_SANE_OUTPUTS
+
+#define BYTES_PER_OUTPUT 6
 #define BITS_PER_COLOR 12
 #define BYTES_PER_FRAME (BITS_PER_COLOR*BYTES_PER_OUTPUT)
 
 #define VAR_DELAY 8050
 #define CONST_DELAY 9440
 
-#define PREPARE_OUTPUT do { DDRD |= B11111110; DDRB |= B00101111; DDRC |= B00111111; } while(0)
-#define SAY_ONE      do { PORTD &= 0x03; PORTB &= 0xF0; PORTC &= 0xC0; } while(0)
-#define SAY_ZERO     do { PORTD |= 0xFC; PORTB |= 0x0F; PORTC |= 0x3F; } while(0)
+#define PREPARE_OUTPUT do {                     \
+DDRA = 0xFF;                                    \
+DDRB = 0xFF;                                    \
+DDRC = 0xFF;                                    \
+DDRE = 0xFF;                                    \
+DDRF = 0xFF;                                    \
+DDRG = 0xFF;                                    \
+} while(0)
+
+#define SAY_ONE do {                            \
+PORTA = 0x00;                                   \
+PORTB = 0x00;                                   \
+PORTC = 0x00;                                   \
+PORTE = 0x00;                                   \
+PORTF = 0x00;                                   \
+PORTG = 0x00;                                   \
+} while(0)
+
+#define SAY_ZERO do {                           \
+PORTA = 0xFF;                                   \
+PORTB = 0xFF;                                   \
+PORTC = 0xFF;                                   \
+PORTE = 0xFF;                                   \
+PORTF = 0xFF;                                   \
+PORTG = 0xFF;                                   \
+} while(0)
+
+#define OUT_VAR(cursor) do {                    \
+PORTA = (cursor)[0];                            \
+PORTB = (cursor)[1];                            \
+PORTC = (cursor)[2];                            \
+PORTE = (cursor)[3];                            \
+PORTF = (cursor)[4];                            \
+PORTG = (cursor)[5];                            \
+_delay_ns(VAR_DELAY);                           \
+} while(0)
+
+#else
+
+#define BYTES_PER_OUTPUT 9
+#define BITS_PER_COLOR 12
+#define BYTES_PER_FRAME (BITS_PER_COLOR*BYTES_PER_OUTPUT)
+
+#define VAR_DELAY 8050
+#define CONST_DELAY 9440
+
+#define PREPARE_OUTPUT do {                     \
+DDRA = 0xFF;                                    \
+DDRB = 0xFF;                                    \
+DDRC = 0xFF;                                    \
+DDRD = 0xFF;                                    \
+DDRE = 0xFF;                                    \
+DDRG = 0xFF;                                    \
+DDRH = 0xFF;                                    \
+DDRJ = 0xFF;                                    \
+DDRL = 0xFF;                                    \
+} while(0)
+
+#define SAY_ONE do {                            \
+PORTA = 0x00;                                   \
+PORTB = 0x00;                                   \
+PORTC = 0x00;                                   \
+PORTD = 0x00;                                   \
+PORTE = 0x00;                                   \
+PORTG = 0x00;                                   \
+PORTH = 0x00;                                   \
+PORTJ = 0x00;                                   \
+PORTL = 0x00;                                   \
+} while(0)
+
+#define SAY_ZERO do {                           \
+PORTA = 0xFF;                                   \
+PORTB = 0xFF;                                   \
+PORTC = 0xFF;                                   \
+PORTD = 0xFF;                                   \
+PORTE = 0xFF;                                   \
+PORTG = 0xFF;                                   \
+PORTH = 0xFF;                                   \
+PORTJ = 0xFF;                                   \
+PORTL = 0xFF;                                   \
+} while(0)
+
+#define OUT_VAR(cursor) do {                    \
+PORTA = (cursor)[0];                            \
+PORTB = (cursor)[1];                            \
+PORTC = (cursor)[2];                            \
+PORTD = (cursor)[3];                            \
+PORTE = (cursor)[4];                            \
+PORTG = (cursor)[5];                            \
+PORTH = (cursor)[6];                            \
+PORTJ = (cursor)[7];                            \
+PORTL = (cursor)[8];                            \
+_delay_ns(VAR_DELAY);                           \
+} while(0)
+
+
+#endif
+
 #define OUT_ONE      do { SAY_ONE;  _delay_ns(CONST_DELAY); } while(0)
 #define OUT_ZERO     do { SAY_ZERO; _delay_ns(CONST_DELAY); } while(0)
 
@@ -48,13 +148,6 @@
 #define START_NUM    do { SAY_ONE;  _delay_ns(CONST_DELAY); } while(0)
 #define START_BRIGHT do { SAY_ONE;  _delay_ns(CONST_DELAY); } while(0)
 #define START_COLOR  do { SAY_ONE;  _delay_ns(CONST_DELAY); } while(0)
-
-#define OUT_VAR(cursor) do {                                            \
-PORTC = (PORTC & 0xC0) | ((cursor)[0] & 0x3F);                          \
-PORTD = (PORTD & 0x03) | (((cursor)[1] &0xF0 | ((cursor)[0] >> 4)) & 0xFC); \
-PORTB = (PORTB & 0xF0) | ((cursor)[1] & 0x0F);                          \
- _delay_ns(VAR_DELAY);                                                  \
-} while(0)
 
 #define STOP_BIT     do { SAY_ZERO; _delay_ns(CONST_DELAY); } while(0)
 #define STOP_BLIP    do { SAY_ONE; } while(0)
