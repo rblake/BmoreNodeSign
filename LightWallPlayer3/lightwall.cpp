@@ -44,7 +44,7 @@ LightWall::~LightWall()
 void LightWall::begin(uint8_t lightsPerString, uint8_t lightsPerRow) 
 {
   intensity = DEFAULT_INTENSITY;
-  for (int i=0;i<12;i++)
+  for (int i=0;i<BYTES_PER_FRAME; i++)
     { Buffer[i] = 0; }// Initial buffer is White
   LPS = lightsPerString;
   if (lightsPerRow > lightsPerString)
@@ -121,7 +121,7 @@ void LightWall::fadein(uint16_t time, uint8_t newIntensity)
 //Sets screen to black
 void LightWall::blank_screen()
 {
-  for (int i=0;i<24;i++)
+  for (int i=0;i<BYTES_PER_FRAME; i++)
   {  Buffer[i]=0xFF;  }
   for(int i=0;i<LPS;i++)
   {
@@ -233,47 +233,14 @@ uint8_t LightWall::lightsPerRow()
   if (intensity & B00000001) {OUT_ONE;} else {OUT_ZERO;}
   STOP_BIT;
 
-  //send Blue (4 bits, MSB first)
-  START_COLOR;
-  OUT_VAR(Buffer[0],Buffer[1]);
-  STOP_BIT;
-  START_COLOR;
-  OUT_VAR(Buffer[2],Buffer[3]);
-  STOP_BIT;
-  START_COLOR;
-  OUT_VAR(Buffer[4],Buffer[5]);
-  STOP_BIT;
-  START_COLOR;
-  OUT_VAR(Buffer[6],Buffer[7]);
-  STOP_BIT;
- 
-  //send Green (4 bits, MSB first)
-  START_COLOR;
-  OUT_VAR(Buffer[8],Buffer[9]);
-  STOP_BIT;
-  START_COLOR;
-  OUT_VAR(Buffer[10],Buffer[11]);
-  STOP_BIT;
-  START_COLOR;
-  OUT_VAR(Buffer[12],Buffer[13]);
-  STOP_BIT;
-  START_COLOR;
-  OUT_VAR(Buffer[14],Buffer[15]);
-  STOP_BIT;
-
-  //send Red (4 bits, MSB first)
-  START_COLOR;
-  OUT_VAR(Buffer[16],Buffer[17]);
-  STOP_BIT;
-  START_COLOR;
-  OUT_VAR(Buffer[18],Buffer[19]);
-  STOP_BIT;
-  START_COLOR;
-  OUT_VAR(Buffer[20],Buffer[21]);
-  STOP_BIT;
-  START_COLOR;
-  OUT_VAR(Buffer[22],Buffer[23]);
-  STOP_BIT;
+  //send 12 bits of color: 4 Blue, 4 Green, 4 Red, MSB first.
+  byte* cursor=Buffer;
+  for(int ii=0; ii<BITS_PER_COLOR; ii++) {
+    START_COLOR;
+    OUT_VAR(cursor);
+    STOP_BIT;
+    cursor += BYTES_PER_OUTPUT;
+  }
 
   //Set line idle
   STOP_BLIP;

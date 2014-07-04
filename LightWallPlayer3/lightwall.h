@@ -31,6 +31,10 @@
 
 // These are used to adjust the internal timings during output.
 // Depending on the tolerances of individual bulbs you may need to adjust these.
+#define BYTES_PER_OUTPUT 2
+#define BITS_PER_COLOR 12
+#define BYTES_PER_FRAME (BITS_PER_COLOR*BYTES_PER_OUTPUT)
+
 #define VAR_DELAY 8050
 #define CONST_DELAY 9440
 
@@ -45,10 +49,11 @@
 #define START_BRIGHT do { SAY_ONE;  _delay_ns(CONST_DELAY); } while(0)
 #define START_COLOR  do { SAY_ONE;  _delay_ns(CONST_DELAY); } while(0)
 
-#define OUT_VAR(hi,lo) do {                                     \
-PORTC = (PORTC & 0xC0) | ((lo) & 0x3F);                         \
-PORTD = (PORTD & 0x03) | (((hi) &0xF0 | ((lo) >> 4)) & 0xFC);   \
-PORTB = (PORTB & 0xF0) | ((hi) & 0x0F); _delay_ns(VAR_DELAY);   \
+#define OUT_VAR(cursor) do {                                            \
+PORTC = (PORTC & 0xC0) | ((cursor)[0] & 0x3F);                          \
+PORTD = (PORTD & 0x03) | (((cursor)[1] &0xF0 | ((cursor)[0] >> 4)) & 0xFC); \
+PORTB = (PORTB & 0xF0) | ((cursor)[1] & 0x0F);                          \
+ _delay_ns(VAR_DELAY);                                                  \
 } while(0)
 
 #define STOP_BIT     do { SAY_ZERO; _delay_ns(CONST_DELAY); } while(0)
@@ -75,7 +80,7 @@ class LightWall {
   *
   * The data bus is inverted, so the data going in must be inverted as well,
   */
-  uint8_t Buffer[24];
+  uint8_t Buffer[BYTES_PER_FRAME];
   
   // Prior to initializtion and addressing, a 30 second delay is introduced to provide time
   // to reprogram the arduino.

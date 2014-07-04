@@ -89,7 +89,7 @@ void setup()
 void loop()
 {
   {
-    byte assert_default_display[sizeof(default_display)/sizeof(default_display[0]) == lights_per_string*24];
+    byte assert_default_display[sizeof(default_display)/sizeof(default_display[0]) == lights_per_string*BYTES_PER_FRAME];
   }
   const bool test_pin_timings=false;
   if (test_pin_timings) {
@@ -97,11 +97,15 @@ void loop()
     // We measured this with an oscilliscope to be 10us.
     const bool should_test_var = false;
     if (should_test_var) {
+      volatile byte zero[BYTES_PER_OUTPUT];
+      volatile byte one[BYTES_PER_OUTPUT];
+      for (int ii=0; ii<BYTES_PER_OUTPUT; ii++) {
+        zero[ii] = 0xFF;
+        one[ii] = 0x00;
+      }
       while (1) {
-        volatile byte zero = 0xFF;
-        OUT_VAR(zero,zero);
-        volatile byte one = 0x00;
-        OUT_VAR(one,one);
+        OUT_VAR(zero);
+        OUT_VAR(one);
       }
     } else {
       while (1) {
@@ -114,8 +118,8 @@ void loop()
 
   while (1) {
     for (int ii=0; ii<lights_per_string; ii++) {
-      for (int jj=0; jj<24; jj++) {
-        LW.Buffer[jj]=default_display[ii*24+jj];
+      for (int jj=0; jj<BYTES_PER_FRAME; jj++) {
+        LW.Buffer[jj]=default_display[ii*BYTES_PER_FRAME+jj];
       }
       LW.send_frame(ii);
       _delay_us(48);
@@ -137,9 +141,9 @@ void loop()
         }
       }
       for (int ii=0; ii<lights_per_string; ii++) {
-        for (int jj=0; jj<24; jj++) {
+        for (int jj=0; jj<BYTES_PER_FRAME; jj++) {
           while (Serial.available() < 1) {}
-          default_display[ii*24+jj]=Serial.read();
+          default_display[ii*BYTES_PER_FRAME+jj]=Serial.read();
         }
       }
     }
