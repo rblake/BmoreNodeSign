@@ -39,7 +39,7 @@ PORTF = 0xFF;                                   \
 PORTG = 0xFF;                                   \
 } while(0)
 
-byte displayA[BYTES_PER_FRAME*LIGHTS_PER_STRING] =
+byte displayA[BYTES_PER_FRAME*LIGHTS_PER_STRING+1] =
 "\xfe\xff\xff\xfe\xff\xff\xfe\xff\xff\xfe\xff\xff\xfe\xff\xff\xfe\xff\xff\xfe\xff\xff\xfe\xff\xff"
 "\xfe\xff\xff\xfe\xff\xff\xfe\xff\xff\xfe\xff\xff\xfe\xff\xff\xfe\xff\xff\xfe\xff\xff\xfe\xff\xff"
 "\xfe\xff\xff\xfe\xff\xff\xfe\xff\xff\xfe\xff\xff\xfe\xff\xff\xfe\xff\xff\xfe\xff\xff\xfe\xff\xff"
@@ -114,10 +114,10 @@ byte displayA[BYTES_PER_FRAME*LIGHTS_PER_STRING] =
 "\xff\xff\x1f\xff\xff\xff\xff\xff\x1f\xff\xff\xff\xff\xff\x1f\xff\xff\xff\xff\xff\x1f\xff\xff\xff"
 ;
 
-byte displayB[BYTES_PER_FRAME*LIGHTS_PER_STRING];
+byte displayB[BYTES_PER_FRAME*LIGHTS_PER_STRING+1];
 
-byte* currentDisplay = &displayA;
-byte* nextDisplay = &displayB;
+byte* currentDisplay = displayA;
+byte* nextDisplay = displayB;
 
 
 #define STATIC_ASSERT(test, name) byte assert##name[!(test)]
@@ -128,12 +128,13 @@ byte* nextDisplay = &displayB;
 #define INTERRUPT_MAX (1+NUMBITS*3+3)
 #define WAIT_FOR_FRAME (INTERRUPT_MAX+1)
 
-byte addr;
+volatile byte addr;
 byte intensity=0xCC;
-byte* outputBuffer;
-int iterCount=WAIT_FOR_FRAME;
+volatile byte* outputBuffer;
+volatile int iterCount=WAIT_FOR_FRAME;
+
+#if 0
 void allLightsInterrupt() {
-  static int iterCount=0;
   
   //Trigger that we're sending now.
   if (iterCount == 0) {
@@ -184,6 +185,7 @@ void allLightsInterrupt() {
     iterCount++;
   }
 }
+#endif
 
 void renderFrame() {
   while (iterCount != WAIT_FOR_FRAME) {}
@@ -192,15 +194,53 @@ void renderFrame() {
   iterCount=0;
 }
 
+volatile boolean l;
+ 
+void TC0_Handler()
+{
+    long dummy=REG_TC0_SR0; // vital - reading this clears some flag
+                            // otherwise you get infinite interrupts
+    l= !l;
+    digitalWrite(13,l);
+}
+
 void setup() 
 {
-  Serial.println(ARDUINO_ID);
-  //FIXME set up the interrupt routine here.
+  //Serial.println(ARDUINO_ID);
+  pinMode(13,OUTPUT);
   
+  //setup interrupts
+  pmc_enable_periph_clk(ID_TC0);
+  REG_TC0_WPMR=0x54494D00; // enable write to registers
+ 
+  // REG_TC0_CMR0=0b00000000000010011100010000000000; // set channel mode register (see datasheet)
+  REG_TC0_CMR0 =
+      TC_CMR_WAVE
+    | TC_CMR_EEVTEDG_NONE
+    | TC_CMR_EEVT_XC0
+    | TC_CMR_WAVSEL_UP_RC
+    // | TC_CMR_ACPA_SET
+    // | TC_CMR_ACPC_CLEAR
+   
+    | TC_CMR_TCCLKS_TIMER_CLOCK4;  // mclk/128 = 656.250 KHz
+   
+  REG_TC0_RC0=656250;    // counter period
+  REG_TC0_RA0=656250/5;  // PWM value
+  REG_TC0_CCR0=          // start counter
+      TC_CCR_SWTRG
+    | TC_CCR_CLKEN;
+  REG_TC0_IER0= TC_IER_CPCS; // enable interrupt on counter=rc
+  REG_TC0_IDR0=~TC_IDR_CPCS; // disable other interrupts
+ 
+  NVIC_EnableIRQ(TC0_IRQn); // enable TC0 interrupts
+ 
 }
 
 void loop()
 {
+  return;
+  while (1) {}
+  
   do {
     renderFrame();
     const bool do_read = false;
@@ -224,7 +264,7 @@ void loop()
           nextDisplay[ii*BYTES_PER_FRAME+jj]=Serial.read();
         }
       }
-      swap(currentDisplay,nextDisplay);
+      //swap(currentDisplay,nextDisplay);
     }
   } while (1);
 }
